@@ -40,6 +40,7 @@ public class OverlappingCopy
 		//android.util.Log.i("LBM","Copy "+source.toString()+" to "+destX+","+destY);
 		int deltaX = destX - source.left;
 		int deltaY = destY - source.top;
+		
 		int absDeltaX = deltaX < 0 ? -deltaX : deltaX;
 		int absDeltaY = deltaY < 0 ? -deltaY : deltaY;
 		
