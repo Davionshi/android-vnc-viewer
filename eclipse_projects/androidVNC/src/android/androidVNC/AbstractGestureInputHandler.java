@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 
+
 import com.antlersoft.android.bc.BCFactory;
 import com.antlersoft.android.bc.IBCScaleGestureDetector;
 import com.antlersoft.android.bc.OnScaleGestureListener;
@@ -36,7 +37,7 @@ abstract class AbstractGestureInputHandler extends GestureDetector.SimpleOnGestu
 	}
 
 	@Override
-	public boolean onTouchEvent(MotionEvent evt) {
+	public boolean onTouchEvent(MotionEvent evt) {//需要通过返回true来拦截此次的触屏操作
 		scaleGestures.onTouchEvent(evt);
 		return gestures.onTouchEvent(evt);
 	}

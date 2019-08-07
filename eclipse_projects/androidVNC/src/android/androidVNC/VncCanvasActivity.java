@@ -24,6 +24,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+
 import com.antlersoft.android.bc.BCFactory;
 
 import com.antlersoft.android.zoomer.ZoomControls;
@@ -59,6 +60,10 @@ import android.content.Context;
 
 public class VncCanvasActivity extends Activity {
 
+	
+	
+	
+	
 	/**
 	 * @author Michael A. MacDonald
 	 */
@@ -190,7 +195,7 @@ public class VncCanvasActivity extends Activity {
 		 * @see android.androidVNC.AbstractGestureInputHandler#onTouchEvent(android.view.MotionEvent)
 		 */
 		@Override
-		public boolean onTouchEvent(MotionEvent e) {
+		public boolean onTouchEvent(MotionEvent e) {//当固定返回false时无法在识别任何屏幕触控
 			if (dragMode) {
 				vncCanvas.changeTouchCoordinatesToFullFrame(e);
 				if (e.getAction() == MotionEvent.ACTION_UP)
@@ -426,7 +431,7 @@ public class VncCanvasActivity extends Activity {
 		 * @see android.androidVNC.AbstractGestureInputHandler#onTouchEvent(android.view.MotionEvent)
 		 */
 		@Override
-		public boolean onTouchEvent(MotionEvent e) {
+		public boolean onTouchEvent(MotionEvent e) {//固定返回false没有任何变化
 			if (dragMode) {
 				// compute the relative movement offset on the remote screen.
 				float deltaX = (e.getX() - dragX) *vncCanvas.getScale();
@@ -447,6 +452,7 @@ public class VncCanvasActivity extends Activity {
 				return vncCanvas.processPointerEvent(e, true);
 			} else
 				return super.onTouchEvent(e);
+			
 		}
 
 		/**
@@ -988,7 +994,7 @@ public class VncCanvasActivity extends Activity {
 	}
 
 	@Override
-	public boolean onTouchEvent(MotionEvent event) {
+	public boolean onTouchEvent(MotionEvent event) {//固定返回false时无触控反应
 		return inputHandler.onTouchEvent(event);
 	}
 
@@ -1099,7 +1105,7 @@ public class VncCanvasActivity extends Activity {
 		if (vncCanvas.processPointerEvent(evt, trackballButtonDown)) {
 			return true;
 		}
-		return VncCanvasActivity.super.onTouchEvent(evt);
+		return VncCanvasActivity.super.onTouchEvent(evt);//无反应
 	}
 
 	long hideZoomAfterMs;
@@ -1108,7 +1114,7 @@ public class VncCanvasActivity extends Activity {
 
 	private void showZoomer(boolean force) {
 		if (force || zoomer.getVisibility() != View.VISIBLE) {
-			zoomer.show();
+//			zoomer.show();//打开或关闭缩放功能
 			hideZoomAfterMs = SystemClock.uptimeMillis() + ZOOM_HIDE_DELAY_MS;
 			vncCanvas.handler
 					.postAtTime(hideZoomInstance, hideZoomAfterMs + 10);
@@ -1219,7 +1225,7 @@ public class VncCanvasActivity extends Activity {
 		 */
 		@Override
 		public boolean onTouchEvent(MotionEvent event) {
-			return touchPan(event);
+			return touchPan(event);	
 		}
 
 		/*
@@ -1604,6 +1610,7 @@ public class VncCanvasActivity extends Activity {
 				return true;
 			return VncCanvasActivity.super.onTouchEvent(event);
 		}
+		
 
 		/*
 		 * (non-Javadoc)

@@ -8,7 +8,7 @@ public enum COLORMODEL {
 	public int bpp() {
 		switch (this) {
 		case C24bit:
-			return 4;
+			return 24;
 		default:
 			return 1;
 		}

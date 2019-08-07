@@ -118,6 +118,7 @@ public class VncCanvas extends ImageView {
 	
 	private Paint handleRREPaint;
 	
+	
 	/**
 	 * Position of the top left portion of the <i>visible</i> part of the screen, in
 	 * full-frame coordinates
@@ -323,7 +324,6 @@ public class VncCanvas extends ImageView {
 	public void processNormalProtocol(final Context context, ProgressDialog pd, final Runnable setModes) throws Exception {
 		try {
 			bitmapData.writeFullUpdateRequest(false);
-
 			handler.post(setModes);
 			//
 			// main dispatch loop
@@ -334,11 +334,13 @@ public class VncCanvas extends ImageView {
 				int msgType = rfb.readServerMessageType();
 				bitmapData.doneWaiting();
 				// Process the message depending on its type.
+				System.out.println("----------------msgType:" + msgType + "----------------");
 				switch (msgType) {
 				case RfbProto.FramebufferUpdate:
 					rfb.readFramebufferUpdate();
-
+					System.out.println("rfb.updateNRects:" + rfb.updateNRects);
 					for (int i = 0; i < rfb.updateNRects; i++) {
+						System.out.println("rfb.updateNRects num:" + i);
 						rfb.readFramebufferUpdateRectHdr();
 						int rx = rfb.updateRectX, ry = rfb.updateRectY;
 						int rw = rfb.updateRectW, rh = rfb.updateRectH;
@@ -373,10 +375,11 @@ public class VncCanvas extends ImageView {
 						}
 
 						rfb.startTiming();
-
+						System.out.println("switch:" + rfb.updateRectEncoding);
 						switch (rfb.updateRectEncoding) {
 						case RfbProto.EncodingRaw:
-							handleRawRect(rx, ry, rw, rh);
+							handleRawRect(rx, ry, rw, rh);//640
+							System.out.println("switch 0 is working");
 							break;
 						case RfbProto.EncodingCopyRect:
 							handleCopyRect(rx, ry, rw, rh);
@@ -391,8 +394,9 @@ public class VncCanvas extends ImageView {
 						case RfbProto.EncodingHextile:
 							handleHextileRect(rx, ry, rw, rh);
 							break;
-						case RfbProto.EncodingZRLE:
+						case RfbProto.EncodingZRLE://1365
 							handleZRLERect(rx, ry, rw, rh);
+							System.out.println("switch 16 is working");
 							break;
 						case RfbProto.EncodingZlib:
 							handleZlibRect(rx, ry, rw, rh);
@@ -414,10 +418,10 @@ public class VncCanvas extends ImageView {
 						setPixelFormat();
 						fullUpdateNeeded = true;
 					}
-
+					
 					setEncodings(true);
 					bitmapData.writeFullUpdateRequest(!fullUpdateNeeded);
-
+					
 					break;
 
 				case RfbProto.SetColourMapEntries:
@@ -462,16 +466,14 @@ public class VncCanvas extends ImageView {
 	 * @param e MotionEvent with the original, touch space coordinates.  This event is altered in place.
 	 * @return e -- The same event passed in, with the coordinates mapped
 	 */
-	MotionEvent changeTouchCoordinatesToFullFrame(MotionEvent e)
+	MotionEvent changeTouchCoordinatesToFullFrame(MotionEvent e)//将触屏输入转化为对应的坐标
 	{
 		//Log.v(TAG, String.format("tap at %f,%f", e.getX(), e.getY()));
-		float scale = getScale();
-		
 		// Adjust coordinates for Android notification bar.
+//		float scale = getScale();
 		e.offsetLocation(0, -1f * getTop());
-
-		e.setLocation(absoluteXPosition + e.getX() / scale, absoluteYPosition + e.getY() / scale);
-		
+		e.setLocation( 480f -  e.getY() / ZoomScaling.scalingW,  e.getX() / ZoomScaling.scalingH);//全屏下的坐标转换设置
+//		e.setLocation( absoluteXPosition + e.getX()/scale,  absoluteYPosition + e.getY()/scale);
 		return e;
 	}
 
@@ -501,35 +503,33 @@ public class VncCanvas extends ImageView {
 			Log.w(TAG,ioe);
 		}
 	}
-
-	/*
-	 * f(x,s) is a function that returns the coordinate in screen/scroll space corresponding
-	 * to the coordinate x in full-frame space with scaling s.
-	 * 
-	 * This function returns the difference between f(x,s1) and f(x,s2)
-	 * 
-	 * f(x,s) = (x - i/2) * s + ((i - w)/2)) * s
-	 *        = s (x - i/2 + i/2 + w/2)
-	 *        = s (x + w/2)
-	 * 
-	 * 
-	 * f(x,s) = (x - ((i - w)/2)) * s
-	 * @param oldscaling
-	 * @param scaling
-	 * @param imageDim
-	 * @param windowDim
-	 * @param offset
-	 * @return
-	 */
 	
 	/**
 	 * Change to Canvas's scroll position to match the absoluteXPosition
 	 */
-	void scrollToAbsolute()
+	void scrollToAbsolute()//设定画布初始的位置
 	{
-		float scale = getScale();
-		scrollTo((int)((absoluteXPosition + ((float)getWidth() - getImageWidth()) / 2 ) * scale),
-				(int)((absoluteYPosition + ((float)getHeight() - getImageHeight()) / 2 ) * scale));
+//		System.out.println("----------------scrollToAbsolute one time---------------");
+//		float scale = getScale();
+//		int xPosition = (int)((absoluteXPosition + ((float)getWidth() - getImageWidth()) / 2 ) * scale); 
+//		int yPosition = (int)((absoluteYPosition + ((float)getHeight() - getImageHeight()) / 2 ) * scale);
+		int xPosition = (int) ((getWidth() - getImageWidth())/2 * ZoomScaling.scalingH);//全屏下的X坐标设置
+		int yPosition = -586;//全屏下的Y坐标设置
+		scrollTo(xPosition, yPosition);
+		
+//		System.out.println("absoluteXPosition:" + absoluteXPosition);
+//		System.out.println("absoluteYPosition:" + absoluteYPosition);
+//		System.out.println("getWidth:" + getWidth());
+//		System.out.println("getHeight:" + getHeight());
+//		System.out.println("getImageWidth:" + getImageWidth());
+//		System.out.println("getImageHegiht:" + getImageHeight());
+//		System.out.println("getVisibleWidth:" + getVisibleWidth());
+//		System.out.println("getVisibleHegiht:" + getVisibleHeight());
+//		System.out.println("--------------------------------------------------------");
+//		System.out.println("XPosition:" + xPosition);
+//		System.out.println("YPosition:" + yPosition);
+//		System.out.println("--------------------------------------------------------");
+		
 	}
 
 	/**
@@ -599,12 +599,10 @@ public class VncCanvas extends ImageView {
 	 * @return True if the pan changed the view (did not move view out of bounds); false otherwise
 	 */
 	boolean pan(int dX, int dY) {
-		
 		double scale = getScale();
-		
 		double sX = (double)dX / scale;
 		double sY = (double)dY / scale;
-		
+
 		if (absoluteXPosition + sX < 0)
 			// dX = diff to 0
 			sX = -absoluteXPosition;
@@ -619,6 +617,7 @@ public class VncCanvas extends ImageView {
 
 		absoluteXPosition += sX;
 		absoluteYPosition += sY;
+
 		if (sX != 0.0 || sY != 0.0)
 		{
 			scrollToAbsolute();
@@ -647,10 +646,11 @@ public class VncCanvas extends ImageView {
 		int[] pixels=bitmapData.bitmapPixels;
 		if (bytesPerPixel == 1) {
 			// 1 byte per pixel. Use palette lookup table.
+			
 		  if (w > handleRawRectBuffer.length) {
 			  handleRawRectBuffer = new byte[w];
 		  }
-			int i, offset;
+		  	int i, offset;
 			for (int dy = y; dy < y + h; dy++) {
 				rfb.readFully(handleRawRectBuffer, 0, w);
 				if ( ! valid)
@@ -662,11 +662,12 @@ public class VncCanvas extends ImageView {
 			}
 		} else {
 			// 4 bytes per pixel (argb) 24-bit color
-		  
+			
 			final int l = w * 4;
 			if (l>handleRawRectBuffer.length) {
-      handleRawRectBuffer = new byte[l];
+				handleRawRectBuffer = new byte[l];
 			}
+			 
 			int i, offset;
 			for (int dy = y; dy < y + h; dy++) {
 				rfb.readFully(handleRawRectBuffer, 0, l);
@@ -685,17 +686,18 @@ public class VncCanvas extends ImageView {
 			return;
 
 		bitmapData.updateBitmap( x, y, w, h);
-
-		if (paint)
+		if (paint) {
 			reDraw();
+		}
+			
 	}
 
 	private Runnable reDraw = new Runnable() {
 		public void run() {
-			if (showDesktopInfo) {
+			if (showDesktopInfo) {//建立连接后显示连接信息
 				// Show a Toast with the desktop info on first frame draw.
 				showDesktopInfo = false;
-				showConnectionInfo();
+//				showConnectionInfo();
 			}
 			if (bitmapData != null)
 				bitmapData.updateView(VncCanvas.this);
@@ -703,9 +705,11 @@ public class VncCanvas extends ImageView {
 	};
 	
 	private void reDraw() {
-		if (repaintsEnabled)
+		if (repaintsEnabled) {
 			handler.post(reDraw);
+		}		
 	}
+	
 	
 	public void disableRepaints() {
 		repaintsEnabled = false;
@@ -975,6 +979,7 @@ public class VncCanvas extends ImageView {
 	
 	public int getVisibleWidth() {
 		return (int)((double)getWidth() / getScale() + 0.5);
+		
 	}
 
 	public int getVisibleHeight() {
@@ -1004,7 +1009,7 @@ public class VncCanvas extends ImageView {
 	 * 
 	 */
 
-	private void setEncodings(boolean autoSelectOnly) {
+	private void setEncodings(boolean autoSelectOnly) {//设定优先使用的编码格式
 		if (rfb == null || !rfb.inNormalProtocol)
 			return;
 
@@ -1050,7 +1055,8 @@ public class VncCanvas extends ImageView {
 
 		encodings[nEncodings++] = RfbProto.EncodingLastRect;
 		encodings[nEncodings++] = RfbProto.EncodingNewFBSize;
-
+		
+		
 		boolean encodingsWereChanged = false;
 		if (nEncodings != nEncodingsSaved) {
 			encodingsWereChanged = true;
@@ -1072,6 +1078,8 @@ public class VncCanvas extends ImageView {
 			encodingsSaved = encodings;
 			nEncodingsSaved = nEncodings;
 		}
+		
+		
 	}
 
 	//
@@ -1121,8 +1129,10 @@ public class VncCanvas extends ImageView {
 		int pixel;
 		if (bytesPerPixel == 1) {
 			pixel = colorPalette[0xFF & bg_buf[0]];
+			System.out.println("test 256 color model in handleRRERect");
 		} else {
 			pixel = Color.rgb(bg_buf[2] & 0xFF, bg_buf[1] & 0xFF, bg_buf[0] & 0xFF);
+			System.out.println("test 24bit color model in handleRRERect");
 		}
 		handleRREPaint.setColor(pixel);
 		if ( valid)
@@ -1165,13 +1175,15 @@ public class VncCanvas extends ImageView {
 	private void handleCoRRERect(int x, int y, int w, int h) throws IOException {
 		boolean valid=bitmapData.validDraw(x, y, w, h);
 		int nSubrects = rfb.is.readInt();
-
+		System.out.println("handleCoRRERECT is work");
 		rfb.readFully(bg_buf, 0, bytesPerPixel);
 		int pixel;
 		if (bytesPerPixel == 1) {
 			pixel = colorPalette[0xFF & bg_buf[0]];
+			
 		} else {
 			pixel = Color.rgb(bg_buf[2] & 0xFF, bg_buf[1] & 0xFF, bg_buf[0] & 0xFF);
+			
 		}
 		handleRREPaint.setColor(pixel);
 		if ( valid)
@@ -1353,7 +1365,6 @@ public class VncCanvas extends ImageView {
   Paint handleZRLERectPaint = new Paint();
   int[] handleZRLERectPalette = new int[128];
 	private void handleZRLERect(int x, int y, int w, int h) throws Exception {
-
 		if (zrleInStream == null)
 			zrleInStream = new ZlibInStream();
 
@@ -1366,7 +1377,7 @@ public class VncCanvas extends ImageView {
 		}
 
 		rfb.readFully(zrleBuf, 0, nBytes);
-
+		
 		zrleInStream.setUnderlying(new MemInStream(zrleBuf, 0, nBytes), nBytes);
 		
 		boolean valid=bitmapData.validDraw(x, y, w, h);

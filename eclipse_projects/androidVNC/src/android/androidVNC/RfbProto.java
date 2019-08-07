@@ -456,6 +456,7 @@ class RfbProto {
 
     switch (securityResult) {
     case VncAuthOK:
+      System.out.println("----------------------start a new test----------------------");
       System.out.println(authType + ": success");
       break;
     case VncAuthFailed:

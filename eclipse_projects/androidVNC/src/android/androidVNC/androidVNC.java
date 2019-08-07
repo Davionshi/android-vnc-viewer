@@ -27,6 +27,7 @@ import android.app.ActivityManager.MemoryInfo;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -65,7 +66,6 @@ public class androidVNC extends Activity {
 
 		super.onCreate(icicle);
 		setContentView(R.layout.main);
-
 		ipText = (EditText) findViewById(R.id.textIP);
 		portText = (EditText) findViewById(R.id.textPORT);
 		passwordText = (EditText) findViewById(R.id.textPASSWORD);
@@ -198,6 +198,8 @@ public class androidVNC extends Activity {
 		}
 		return true;
 	}
+	
+
 
 	private void updateViewFromSelected() {
 		if (selected==null)

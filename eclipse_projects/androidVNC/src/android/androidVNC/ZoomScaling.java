@@ -4,6 +4,7 @@
 package android.androidVNC;
 
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.util.Log;
 import android.widget.ImageView.ScaleType;
 
@@ -13,6 +14,9 @@ import android.widget.ImageView.ScaleType;
 class ZoomScaling extends AbstractScaling {
 	
 	static final String TAG = "ZoomScaling";
+	public static Point point = new Point();
+	public static float scalingH;
+	public static float scalingW;
 
 	private Matrix matrix;
 	int canvasXOffset;
@@ -41,10 +45,16 @@ class ZoomScaling extends AbstractScaling {
 	/* (non-Javadoc)
 	 * @see android.androidVNC.AbstractScaling#isAbleToPan()
 	 */
+//	@Override
+//	boolean isAbleToPan() {
+//		return true;
+//	}
+
 	@Override
 	boolean isAbleToPan() {
-		return true;
+		return false;
 	}
+	
 
 	/* (non-Javadoc)
 	 * @see android.androidVNC.AbstractScaling#isValidInputMode(int)
@@ -60,6 +70,7 @@ class ZoomScaling extends AbstractScaling {
 	 */
 	private void resolveZoom(VncCanvasActivity activity)
 	{
+		
 		activity.vncCanvas.scrollToAbsolute();
 		activity.vncCanvas.pan(0,0);
 	}
@@ -77,10 +88,12 @@ class ZoomScaling extends AbstractScaling {
 			scaling = (float)4.0;
 			activity.zoomer.setIsZoomInEnabled(false);
 		}
-		activity.zoomer.setIsZoomOutEnabled(true);
+//		activity.zoomer.setIsZoomOutEnabled(true);
 		matrix.postScale(scaling, scaling);
+
 		//Log.v(TAG,String.format("before set matrix scrollx = %d scrolly = %d", activity.vncCanvas.getScrollX(), activity.vncCanvas.getScrollY()));
 		activity.vncCanvas.setImageMatrix(matrix);
+//		System.out.println("matrix:" + matrix);
 		resolveZoom(activity);
 	}
 
@@ -157,6 +170,8 @@ class ZoomScaling extends AbstractScaling {
 	{
 		matrix.reset();
 		matrix.preTranslate(canvasXOffset, canvasYOffset);
+		matrix.preRotate(-90.0f);//设定初始画面旋转
+
 	}
 	
 	/**
@@ -178,9 +193,29 @@ class ZoomScaling extends AbstractScaling {
 		canvasXOffset = -activity.vncCanvas.getCenteredXOffset();
 		canvasYOffset = -activity.vncCanvas.getCenteredYOffset();
 		resetMatrix();
+		
+		
+		activity.getWindowManager().getDefaultDisplay().getRealSize(point);//获取物理屏幕尺寸
+		
+		float w = activity.vncCanvas.getWidth();
+		float h = activity.vncCanvas.getHeight();
+		float iw = activity.vncCanvas.getImageWidth();
+		float ih = activity.vncCanvas.getImageHeight();	
+		float scaling1 = w/ih;
+		scalingH = scaling1;
+		float scaling2 = h/iw;	
+		scalingW = scaling2;
+		matrix.postScale(scaling1, scaling2);//设定初始画面尺寸比例
+
+//		matrix.postScale(scaling, scaling);
 		activity.vncCanvas.setImageMatrix(matrix);
+		
 		// Reset the pan position to (0,0)
 		resolveZoom(activity);
+		
+
 	}
+	
+
 
 }
