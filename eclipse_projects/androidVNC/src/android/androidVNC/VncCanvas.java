@@ -334,13 +334,13 @@ public class VncCanvas extends ImageView {
 				int msgType = rfb.readServerMessageType();
 				bitmapData.doneWaiting();
 				// Process the message depending on its type.
-				System.out.println("----------------msgType:" + msgType + "----------------");
+				
 				switch (msgType) {
 				case RfbProto.FramebufferUpdate:
 					rfb.readFramebufferUpdate();
-					System.out.println("rfb.updateNRects:" + rfb.updateNRects);
+					
 					for (int i = 0; i < rfb.updateNRects; i++) {
-						System.out.println("rfb.updateNRects num:" + i);
+						
 						rfb.readFramebufferUpdateRectHdr();
 						int rx = rfb.updateRectX, ry = rfb.updateRectY;
 						int rw = rfb.updateRectW, rh = rfb.updateRectH;
@@ -375,7 +375,7 @@ public class VncCanvas extends ImageView {
 						}
 
 						rfb.startTiming();
-						System.out.println("switch:" + rfb.updateRectEncoding);
+						
 						switch (rfb.updateRectEncoding) {
 						case RfbProto.EncodingRaw:
 							handleRawRect(rx, ry, rw, rh);//640
@@ -677,7 +677,7 @@ public class VncCanvas extends ImageView {
 				for (i = 0; i < w; i++) {
 				  final int idx = i*4;
 					pixels[offset + i] = // 0xFF << 24 |
-					(handleRawRectBuffer[idx + 2] & 0xff) << 16 | (handleRawRectBuffer[idx + 1] & 0xff) << 8 | (handleRawRectBuffer[idx] & 0xff);
+					(handleRawRectBuffer[idx + 2] & 0xff) << 16 | (handleRawRectBuffer[idx + 1] & 0xff) << 8 | (handleRawRectBuffer[idx] & 0xff | 0xff000000);
 				}
 			}
 		}
@@ -1129,10 +1129,10 @@ public class VncCanvas extends ImageView {
 		int pixel;
 		if (bytesPerPixel == 1) {
 			pixel = colorPalette[0xFF & bg_buf[0]];
-			System.out.println("test 256 color model in handleRRERect");
+			
 		} else {
 			pixel = Color.rgb(bg_buf[2] & 0xFF, bg_buf[1] & 0xFF, bg_buf[0] & 0xFF);
-			System.out.println("test 24bit color model in handleRRERect");
+			
 		}
 		handleRREPaint.setColor(pixel);
 		if ( valid)
@@ -1395,7 +1395,7 @@ public class VncCanvas extends ImageView {
 				int palSize = mode & 127;
 
 				readZrlePalette(handleZRLERectPalette, palSize);
-
+				System.out.println("palSize:" + palSize);
 				if (palSize == 1) {
 					int pix = handleZRLERectPalette[0];
 					int c = (bytesPerPixel == 1) ? colorPalette[0xFF & pix] : (0xFF000000 | pix);
@@ -1480,7 +1480,7 @@ public class VncCanvas extends ImageView {
 				offset = bitmapData.offset(x, dy);
 				for (i = 0; i < w; i++) {
 				  final int idx = i*4;
-					pixels[offset + i] = (handleZlibRectBuffer[idx + 2] & 0xFF) << 16 | (handleZlibRectBuffer[idx + 1] & 0xFF) << 8 | (handleZlibRectBuffer[idx] & 0xFF);
+					pixels[offset + i] = (handleZlibRectBuffer[idx + 2] & 0xFF) << 16 | (handleZlibRectBuffer[idx + 1] & 0xFF) << 8 | (handleZlibRectBuffer[idx] & 0xFF | 0xff000000);
 				}
 			}
 		}
@@ -1499,7 +1499,7 @@ public class VncCanvas extends ImageView {
 			int p1 = is.readU8();
 			int p2 = is.readU8();
 			int p3 = is.readU8();
-			pix = (p3 & 0xFF) << 16 | (p2 & 0xFF) << 8 | (p1 & 0xFF);
+			pix = (p3 & 0xFF) << 16 | (p2 & 0xFF) << 8 | (p1 & 0xFF) | 0xff000000;
 		}
 		return pix;
 	}
@@ -1522,7 +1522,7 @@ public class VncCanvas extends ImageView {
 			is.readBytes(readPixelsBuffer, 0, l);
 			for (int i = 0; i < count; i++) {
 			  final int idx = i*3;
-				dst[i] = ((readPixelsBuffer[idx + 2] & 0xFF) << 16 | (readPixelsBuffer[idx + 1] & 0xFF) << 8 | (readPixelsBuffer[idx] & 0xFF));
+				dst[i] = ((readPixelsBuffer[idx + 2] & 0xFF) << 16 | (readPixelsBuffer[idx + 1] & 0xFF) << 8 | (readPixelsBuffer[idx] & 0xFF) | 0xff000000);
 			}
 		}
 	}
